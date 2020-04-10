@@ -1,9 +1,9 @@
 ﻿  stdafx.cpp
-  Table.cpp
-d:\erik streithorst\documenten\visual studio 2017\projects\freecellsim\freecellsim\table.cpp(11): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-d:\erik streithorst\documenten\visual studio 2017\projects\freecellsim\freecellsim\table.cpp(130): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-d:\erik streithorst\documenten\visual studio 2017\projects\freecellsim\freecellsim\table.cpp(164): warning C4293: '<<': shift count negative or too big, undefined behavior
   FreecellSim.cpp
+  Table.cpp
+D:\Erik Streithorst\Documenten\Visual Studio 2019\Projects\freecell-sim\FreecellSim\Table.cpp(11,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+D:\Erik Streithorst\Documenten\Visual Studio 2019\Projects\freecell-sim\FreecellSim\Table.cpp(83,26): warning C4834: discarding return value of function with 'nodiscard' attribute
+D:\Erik Streithorst\Documenten\Visual Studio 2019\Projects\freecell-sim\FreecellSim\Table.cpp(130,12): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+D:\Erik Streithorst\Documenten\Visual Studio 2019\Projects\freecell-sim\FreecellSim\Table.cpp(164,49): warning C4293: '<<': shift count negative or too big, undefined behavior
   Generating Code...
-  FreecellSim.vcxproj -> D:\Erik Streithorst\Documenten\Visual Studio 2017\Projects\FreecellSim\x64\Debug\FreecellSim.exe
-  FreecellSim.vcxproj -> D:\Erik Streithorst\Documenten\Visual Studio 2017\Projects\FreecellSim\x64\Debug\FreecellSim.pdb (Partial PDB)
+  FreecellSim.vcxproj -> D:\Erik Streithorst\Documenten\Visual Studio 2019\Projects\freecell-sim\x64\Debug\FreecellSim.exe
