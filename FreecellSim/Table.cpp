@@ -167,6 +167,29 @@ void TableClass::checkIfWon(TableClass::Table& t, TableClass::Stats& s) {
 	}
 }
 
+void TableClass::tableToCompact(TableClass::Table& t, TableClass::CompactTable& ct) {
+	// 13x12 rectangle of unsigned long longs
+
+	// Reset compactSpots to zero
+	std::fill(ct.compactSpots.begin(), ct.compactSpots.end(), 0);
+	
+	// Initialize first row/col
+	ct.compactSpots[0] = t.spots[0];
+	ct.compactSpots[13] = t.spots[0];
+
+	int rowCounter{}, colCounter{};
+	for (int i = 1; i < t.spots.size(); i++) {
+		if (!(i%12)) {
+			rowCounter++;
+			colCounter = 0;
+		}
+		
+		ct.compactSpots[rowCounter] = ct.compactSpots[rowCounter] | t.spots[i];
+		ct.compactSpots[colCounter + 13] = ct.compactSpots[colCounter + 13] | t.spots[i];
+		colCounter++;
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Print functions
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

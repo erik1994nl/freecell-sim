@@ -7,20 +7,22 @@ int main()
 	Timer timer(__FUNCTION__);
 	TableClass T;
 	TableClass::Table t;
+	TableClass::CompactTable ct;
 	TableClass::Stats s;
 
 	T.setupTable(t);
 	T.updatePossibleMoves(t);
-	T.printPossibleMoves(t);
+	T.tableToCompact(t, ct);
+	//T.printPossibleMoves(t);
 
 	while (!s.gameIsFinished && s.turns < 200) {
 		std::cout << "turn: " << s.turns << std::endl;
 		T.makeMove(t);
 		T.updatePossibleMoves(t);
-		T.printPossibleMoves(t);
+		//T.printPossibleMoves(t);
 		T.checkIfGameIsFinished(t, s);
 		s.turns++;
-		std::cout << "-------------------------------------------------" << std::endl;
+		//std::cout << "-------------------------------------------------" << std::endl;
 	}
 
 	T.checkIfWon(t,s);

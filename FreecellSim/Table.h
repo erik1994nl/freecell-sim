@@ -28,6 +28,14 @@ public:
 			bottomCards = {};
 		}
 	};
+	struct CompactTable {
+		// Compact table, summarizes table in 25 unsigned long longs
+		// Lay out all 'Table.spots' in 13x12 rectangle, every row and column is a number
+		std::array<unsigned long long, 25> compactSpots;
+		CompactTable() {
+			compactSpots = {};
+		}
+	};
 	struct Stats {
 		bool gameIsFinished;
 		bool gameIsWon;
@@ -50,6 +58,7 @@ public:
 	void makeMove(TableClass::Table& t);
 	void checkIfGameIsFinished(TableClass::Table& t, TableClass::Stats& s);
 	void checkIfWon(TableClass::Table& t, TableClass::Stats& s);
+	void tableToCompact(TableClass::Table& t, TableClass::CompactTable& ct);
 	void printFilledSpots(TableClass::Table& t);
 	void printPossibleMoves(TableClass::Table& t);
 	void printResult(TableClass::Stats& s);
