@@ -179,8 +179,13 @@ void TableClass::tableToCompact(TableClass::Table& t, TableClass::CompactTable& 
 
 	int rowCounter{}, colCounter{};
 	for (int i = 1; i < t.spots.size(); i++) {
-		if (!(i%12)) {
+		// Next row
+		if (!(i % 13)) {
 			rowCounter++;
+		}
+
+		// Back to first column
+		if (!(i%12)) {
 			colCounter = 0;
 		}
 		
