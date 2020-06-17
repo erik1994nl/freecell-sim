@@ -1,9 +1,6 @@
-﻿  stdafx.cpp
-  FreecellSim.cpp
-  Table.cpp
+﻿  Table.cpp
 D:\Erik Streithorst\Documenten\Visual Studio 2019\Projects\freecell-sim\FreecellSim\Table.cpp(11,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-D:\Erik Streithorst\Documenten\Visual Studio 2019\Projects\freecell-sim\FreecellSim\Table.cpp(83,26): warning C4834: discarding return value of function with 'nodiscard' attribute
-D:\Erik Streithorst\Documenten\Visual Studio 2019\Projects\freecell-sim\FreecellSim\Table.cpp(130,12): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-D:\Erik Streithorst\Documenten\Visual Studio 2019\Projects\freecell-sim\FreecellSim\Table.cpp(164,49): warning C4293: '<<': shift count negative or too big, undefined behavior
-  Generating Code...
+D:\Erik Streithorst\Documenten\Visual Studio 2019\Projects\freecell-sim\FreecellSim\Table.cpp(93,26): warning C4834: discarding return value of function with 'nodiscard' attribute
+D:\Erik Streithorst\Documenten\Visual Studio 2019\Projects\freecell-sim\FreecellSim\Table.cpp(140,12): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+D:\Erik Streithorst\Documenten\Visual Studio 2019\Projects\freecell-sim\FreecellSim\Table.cpp(206,49): warning C4293: '<<': shift count negative or too big, undefined behavior
   FreecellSim.vcxproj -> D:\Erik Streithorst\Documenten\Visual Studio 2019\Projects\freecell-sim\x64\Debug\FreecellSim.exe
