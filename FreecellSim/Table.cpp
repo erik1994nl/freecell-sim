@@ -6,7 +6,7 @@
 #include <math.h>
 #include <algorithm>
 
-void TableClass::setupTable(TableClass::Table &t) {
+void TableClass::setupTable(TableClass::Table& t) {
 	Timer timer(__FUNCTION__);
 	srand(time(NULL));
 	int r{};
@@ -22,7 +22,17 @@ void TableClass::setupTable(TableClass::Table &t) {
 	}
 }
 
-void TableClass::updatePossibleMoves(TableClass::Table &t) {
+void TableClass::initializeStrategy(TableClass::Stats& s) {
+	char fileName[MAX_PATH];
+	GetModuleFileNameA(NULL, fileName, MAX_PATH);
+	auto wait = 1;
+}
+
+void TableClass::saveStrategy(TableClass::Stats& s) {
+
+}
+
+void TableClass::updatePossibleMoves(TableClass::Table& t) {
 	Timer timer(__FUNCTION__);
 	std::vector<int> movableCards{};
 	getMovableCards(movableCards, t);
@@ -40,12 +50,12 @@ void TableClass::getMovableCards(std::vector<int>& cards, TableClass::Table& t) 
 
 		// Spot is not bottom card AND has incompatible lower card
 		if (t.spots[i + TABLE_ROW] && !cardsAreCompatible(t.spots[i + TABLE_ROW], t.spots[i])) {
-			skipRestOfColumn[i%TABLE_ROW] = true;
+			skipRestOfColumn[i % TABLE_ROW] = true;
 			continue;
 		}
 
 		// Already found incompatible card in this column, hence skip rest of column
-		if (skipRestOfColumn[i%TABLE_ROW]) {
+		if (skipRestOfColumn[i % TABLE_ROW]) {
 			continue;
 		}
 
@@ -55,7 +65,7 @@ void TableClass::getMovableCards(std::vector<int>& cards, TableClass::Table& t) 
 			cardsToMove++;
 		}
 		if (cardsToMove > (std::count(t.spots.begin() + FIRST_FREECELL_SPOT, t.spots.begin() + FIRST_FREECELL_SPOT + FREECELLS, 0) + 1)) {
-			skipRestOfColumn[i%TABLE_ROW] = true;
+			skipRestOfColumn[i % TABLE_ROW] = true;
 			continue;
 		}
 
@@ -125,7 +135,7 @@ void TableClass::getPossibleMoves(TableClass::Table& t, std::vector<int>& movabl
 	}
 }
 
-bool::TableClass::cardsAreCompatible(const unsigned long long &lowerCard, const unsigned long long &upperCard) {
+bool::TableClass::cardsAreCompatible(const unsigned long long& lowerCard, const unsigned long long& upperCard) {
 	// Lower card is 1 value lower than upper card AND a different color
 	int color = log2(lowerCard);
 	// Black
@@ -145,11 +155,43 @@ bool::TableClass::cardsAreCompatible(const unsigned long long &lowerCard, const 
 	return false;
 }
 
-void TableClass::makeMove(TableClass::Table& t) {
-	// Always do random possible move
-	int r = rand() % t.possibleMoves.size();
-	std::iter_swap(t.spots.begin() + t.possibleMoves[r].first, t.spots.begin() + t.possibleMoves[r].second);
-	std::cout << "Moving from " << t.possibleMoves[r].first << " to " << t.possibleMoves[r].second << "\n";
+void TableClass::makeMove(TableClass::Table& t, const TableClass::MoveType& m, TableClass::Stats& s) {
+	int r{};
+	switch (m)
+	{
+	case TableClass::MoveType::Random:
+	{
+		// Random move
+		r = rand() % t.possibleMoves.size();
+		std::iter_swap(t.spots.begin() + t.possibleMoves[r].first, t.spots.begin() + t.possibleMoves[r].second);
+		std::cout << "Moving from " << t.possibleMoves[r].first << " to " << t.possibleMoves[r].second << "\n";
+		t.lastMove = t.possibleMoves[r];
+		break;
+	}
+	case TableClass::MoveType::Fancy:
+	{
+		std::cout << "Fancy move not available yet." << "\n";
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+void TableClass::updateScore(TableClass::Table& t, TableClass::Stats& s, const TableClass::ScoringSystem& ss) {
+	switch (ss)
+	{
+	case TableClass::ScoringSystem::finalStackIsTen:
+	{
+		// Add ten points when card is movd to final stack
+		if (t.lastMove.second >= FIRST_FINAL_STACK_SPOT && t.lastMove.second < FIRST_FINAL_STACK_SPOT + FINAL_STACKS) {
+			s.score = s.score + 10;
+		}
+		break;
+	}
+	default:
+		break;
+	}
 }
 
 void TableClass::checkIfGameIsFinished(TableClass::Table& t, TableClass::Stats& s) {
@@ -162,43 +204,43 @@ void TableClass::checkIfGameIsFinished(TableClass::Table& t, TableClass::Stats& 
 void TableClass::checkIfWon(TableClass::Table& t, TableClass::Stats& s) {
 	// Final stacks complete
 	auto atLeastKing = [](unsigned long long card) {return card > (1 << 48); };
-	if (std::all_of(t.spots.begin() + FIRST_FINAL_STACK_SPOT, t.spots.begin() + FIRST_FINAL_STACK_SPOT + FINAL_STACKS, atLeastKing )) {
+	if (std::all_of(t.spots.begin() + FIRST_FINAL_STACK_SPOT, t.spots.begin() + FIRST_FINAL_STACK_SPOT + FINAL_STACKS, atLeastKing)) {
 		s.gameIsWon = true;
 	}
 }
 
-void TableClass::tableToCompact(TableClass::Table& t, TableClass::CompactTable& ct) {
+void TableClass::regularToCompact(TableClass::Table& t, TableClass::CompactTable& ct) {
 	// 13x12 rectangle of unsigned long longs
 
 	// Reset compactSpots to zero
 	std::fill(ct.compactSpots.begin(), ct.compactSpots.end(), 0);
-	
+
 	// Initialize first row/col
 	ct.compactSpots[0] = t.spots[0];
 	ct.compactSpots[13] = t.spots[0];
 
-	int rowCounter{}, colCounter{};
+	int rowCounter{}, colCounter = 1;
 	for (int i = 1; i < t.spots.size(); i++) {
-		// Next row
-		if (!(i % 13)) {
+		// Next row and first column
+		if (!(i % 12)) {
 			rowCounter++;
-		}
-
-		// Back to first column
-		if (!(i%12)) {
 			colCounter = 0;
 		}
-		
+
 		ct.compactSpots[rowCounter] = ct.compactSpots[rowCounter] | t.spots[i];
 		ct.compactSpots[colCounter + 13] = ct.compactSpots[colCounter + 13] | t.spots[i];
 		colCounter++;
 	}
 }
 
+void TableClass::compactToRegular(TableClass::Table& t, TableClass::CompactTable& ct) {
+	// TODO: implement function body
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Print functions
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void TableClass::printFilledSpots(TableClass::Table &t) {
+void TableClass::printFilledSpots(TableClass::Table& t) {
 	for (int i{}; i < TOTAL_SPOTS; i++) {
 		if (t.spots[i]) {
 			std::cout << "#";
@@ -225,4 +267,6 @@ void TableClass::printResult(TableClass::Stats& s) {
 	else {
 		std::cout << "The game took " << s.turns << " turns" << std::endl;
 	}
+
+	std::cout << "The final score is: " << s.score << std::endl;
 }

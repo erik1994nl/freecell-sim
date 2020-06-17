@@ -10,14 +10,20 @@ int main()
 	TableClass::CompactTable ct;
 	TableClass::Stats s;
 
+	TableClass::MoveType strategy = TableClass::MoveType::Random;
+	TableClass::ScoringSystem scoringSystem = TableClass::ScoringSystem::finalStackIsTen;
+
 	T.setupTable(t);
+	T.initializeStrategy(s);
 	T.updatePossibleMoves(t);
-	T.tableToCompact(t, ct);
+	T.regularToCompact(t, ct);
 	//T.printPossibleMoves(t);
 
+	// Game loop
 	while (!s.gameIsFinished && s.turns < 200) {
 		std::cout << "turn: " << s.turns << std::endl;
-		T.makeMove(t);
+		T.makeMove(t, strategy, s);
+		T.updateScore(t, s, scoringSystem);
 		T.updatePossibleMoves(t);
 		//T.printPossibleMoves(t);
 		T.checkIfGameIsFinished(t, s);
@@ -25,13 +31,15 @@ int main()
 		//std::cout << "-------------------------------------------------" << std::endl;
 	}
 
-	T.checkIfWon(t,s);
+	T.saveStrategy(s);
+
+	T.checkIfWon(t, s);
 	T.printResult(s);
-	
+
 	//T.printFilledSpots(t);
-	                          
+
 	timer.getCurrentDuration();
 	std::cin.get();
-    return 0;
+	return 0;
 }
 
