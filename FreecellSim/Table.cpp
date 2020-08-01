@@ -5,6 +5,9 @@
 #include <time.h>
 #include <math.h>
 #include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <string>
 
 void TableClass::setupTable(TableClass::Table& t) {
 	Timer timer(__FUNCTION__);
@@ -23,13 +26,34 @@ void TableClass::setupTable(TableClass::Table& t) {
 }
 
 void TableClass::initializeStrategy(TableClass::Stats& s) {
-	char fileName[MAX_PATH];
-	GetModuleFileNameA(NULL, fileName, MAX_PATH);
-	auto wait = 1;
+	char filePathIncFile[MAX_PATH];
+	GetModuleFileNameA(NULL, filePathIncFile, MAX_PATH);
+	std::string::size_type pos = std::string(filePathIncFile).find_last_of("\\/");
+	std::string filePath = std::string(filePathIncFile).substr(0, pos);
+	
+	std::string inFilePath = filePath + "\\data.txt";
+
+	std::string line;
+	std::ifstream infile(inFilePath, std::ifstream::binary);
+	infile.seekg(0, infile.end);
+	long size = infile.tellg();
+	infile.seekg(0);
+	char* buffer = new char[size];
+	infile.read(reinterpret_cast<char*>(&buffer), size);
+
+	s.score = reinterpret_cast<int>(std::move(buffer));
 }
 
 void TableClass::saveStrategy(TableClass::Stats& s) {
+	char filePathIncFile[MAX_PATH];
+	GetModuleFileNameA(NULL, filePathIncFile, MAX_PATH);
+	std::string::size_type pos = std::string(filePathIncFile).find_last_of("\\/");
+	std::string filePath = std::string(filePathIncFile).substr(0, pos);
+	std::string fileToWrite = filePath + "\\data.txt";
 
+	std::ofstream outfile(fileToWrite, std::ofstream::binary);
+	outfile.write(reinterpret_cast<const char*>(&s.score), sizeof(s.score));
+	outfile.close();
 }
 
 void TableClass::updatePossibleMoves(TableClass::Table& t) {
@@ -155,14 +179,23 @@ bool::TableClass::cardsAreCompatible(const unsigned long long& lowerCard, const 
 	return false;
 }
 
+void makeFancyMove(TableClass::Table& t, TableClass::Stats& s, int r) {
+	std::cout << "MAKING FANCY MOVE" << std::endl;
+	int totalValue{};
+	for (auto& move : t.possibleMoves) {
+		totalValue += s.moveValues.at(move);
+	}
+
+}
+
 void TableClass::makeMove(TableClass::Table& t, const TableClass::MoveType& m, TableClass::Stats& s) {
 	int r{};
+	r = rand() % t.possibleMoves.size();
 	switch (m)
 	{
 	case TableClass::MoveType::Random:
 	{
 		// Random move
-		r = rand() % t.possibleMoves.size();
 		std::iter_swap(t.spots.begin() + t.possibleMoves[r].first, t.spots.begin() + t.possibleMoves[r].second);
 		std::cout << "Moving from " << t.possibleMoves[r].first << " to " << t.possibleMoves[r].second << "\n";
 		t.lastMove = t.possibleMoves[r];
@@ -170,6 +203,7 @@ void TableClass::makeMove(TableClass::Table& t, const TableClass::MoveType& m, T
 	}
 	case TableClass::MoveType::Fancy:
 	{
+		makeFancyMove(t, s, r);
 		std::cout << "Fancy move not available yet." << "\n";
 		break;
 	}

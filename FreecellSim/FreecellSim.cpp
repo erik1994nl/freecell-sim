@@ -10,13 +10,13 @@ int main()
 	TableClass::CompactTable ct;
 	TableClass::Stats s;
 
-	TableClass::MoveType strategy = TableClass::MoveType::Random;
+	TableClass::MoveType strategy = TableClass::MoveType::Fancy;
 	TableClass::ScoringSystem scoringSystem = TableClass::ScoringSystem::finalStackIsTen;
 
 	T.setupTable(t);
 	T.initializeStrategy(s);
 	T.updatePossibleMoves(t);
-	T.regularToCompact(t, ct);
+	//T.regularToCompact(t, ct);
 	//T.printPossibleMoves(t);
 
 	// Game loop
@@ -38,8 +38,6 @@ int main()
 
 	//T.printFilledSpots(t);
 
-	timer.getCurrentDuration();
-	std::cin.get();
 	return 0;
 }
 

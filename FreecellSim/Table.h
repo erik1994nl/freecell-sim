@@ -45,16 +45,21 @@ public:
 		bool gameIsWon;
 		int turns;
 		int score;
+		std::map<std::pair<int, int>, int> moveValues;
 		Stats() {
 			gameIsFinished = false;
 			gameIsWon = false;
 			turns = 0;
 			score = 0;
+			moveValues = {};
 		}
 	};
 	enum MoveType
 	{
+		// Pick a randomly selected move from all available moves
 		Random,
+
+		// Pick a move where all possible moves have pre-calculated possibilities
 		Fancy
 	};
 	enum ScoringSystem
