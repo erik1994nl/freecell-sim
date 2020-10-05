@@ -8,6 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <numeric>
 
 void TableClass::setupTable(TableClass::Table& t) {
 	Timer timer(__FUNCTION__);
@@ -31,17 +32,50 @@ void TableClass::initializeStrategy(TableClass::Stats& s) {
 	std::string::size_type pos = std::string(filePathIncFile).find_last_of("\\/");
 	std::string filePath = std::string(filePathIncFile).substr(0, pos);
 	
-	std::string inFilePath = filePath + "\\data.txt";
+	//std::string inFilePath = filePath + "\\data.txt";
 
-	std::string line;
-	std::ifstream infile(inFilePath, std::ifstream::binary);
-	infile.seekg(0, infile.end);
-	long size = infile.tellg();
-	infile.seekg(0);
-	char* buffer = new char[size];
-	infile.read(reinterpret_cast<char*>(&buffer), size);
+	//std::string line;
+	//std::ifstream infile(inFilePath, std::ifstream::binary);
+	//infile.seekg(0, infile.end);
+	//long long size = infile.tellg();
 
-	s.score = reinterpret_cast<int>(std::move(buffer));
+	//if (size == -1) {
+	//	// File does not exist, do not initialize
+	//	return;
+	//}
+	//infile.seekg(0);
+	//char* buffer = new char[size+1];
+	//infile.read(reinterpret_cast<char*>(&buffer), size);
+
+	//s.score = reinterpret_cast<int>(std::move(buffer));
+
+
+
+
+
+
+	std::string inFilePath = filePath + "\\strat.bin";
+	FILE* pStratFile;
+	pStratFile = fopen(inFilePath.c_str(), "rb");
+
+	if (pStratFile == NULL) {
+		return;
+	}
+
+	// Read number of moves
+	int numberOfMoves{};
+	fread(&numberOfMoves, sizeof(int), 1, pStratFile);
+	// Read moves and values
+	std::vector<std::pair<int, int>> moves{};
+	std::pair<int, int> m{};
+	int v{};
+	for (int i{}; i < numberOfMoves; i++) {
+		fread(&m, sizeof(int) * 2, 1, pStratFile);
+		fread(&v, sizeof(int), 1, pStratFile);
+		s.moveValues[m] = v;
+	}
+
+	fclose(pStratFile);
 }
 
 void TableClass::saveStrategy(TableClass::Stats& s) {
@@ -49,11 +83,19 @@ void TableClass::saveStrategy(TableClass::Stats& s) {
 	GetModuleFileNameA(NULL, filePathIncFile, MAX_PATH);
 	std::string::size_type pos = std::string(filePathIncFile).find_last_of("\\/");
 	std::string filePath = std::string(filePathIncFile).substr(0, pos);
-	std::string fileToWrite = filePath + "\\data.txt";
 
-	std::ofstream outfile(fileToWrite, std::ofstream::binary);
-	outfile.write(reinterpret_cast<const char*>(&s.score), sizeof(s.score));
-	outfile.close();
+	std::string fileToWrite = filePath + "\\strat.bin";
+	FILE* pStratFile;
+	pStratFile = fopen(fileToWrite.c_str(), "wb");
+	// Write number of moves
+	auto numberOfMoves = s.moveValues.size();
+	fwrite(&numberOfMoves, sizeof(size_t), 1, pStratFile);
+	// Write moves and values
+	for (auto const& [move, value] : s.moveValues) {
+		fwrite(&move, sizeof(move), 1, pStratFile);
+		fwrite(&value, sizeof(int), 1, pStratFile);
+	}
+	fclose(pStratFile);
 }
 
 void TableClass::updatePossibleMoves(TableClass::Table& t) {
@@ -179,18 +221,43 @@ bool::TableClass::cardsAreCompatible(const unsigned long long& lowerCard, const 
 	return false;
 }
 
-void makeFancyMove(TableClass::Table& t, TableClass::Stats& s, int r) {
-	std::cout << "MAKING FANCY MOVE" << std::endl;
+void::TableClass::makeFancyMove(TableClass::Table& t, TableClass::Stats& s, double r) {
 	int totalValue{};
 	for (auto& move : t.possibleMoves) {
-		totalValue += s.moveValues.at(move);
+		// Add default moveValue to map if it doesn't exist
+		if (s.moveValues.find(move) == s.moveValues.end()) {
+			s.moveValues[move] = DEFAULT_MOVE_VALUE;
+		}
+		totalValue += s.moveValues[move];
 	}
 
+
+	std::vector<double> moveProbabilities{};
+
+	for (auto& move : t.possibleMoves) {
+		moveProbabilities.emplace_back((double)s.moveValues.at(move) / (double)totalValue);
+	}
+
+	double cumProbabilities[500];
+	std::partial_sum(moveProbabilities.begin(), moveProbabilities.end(), cumProbabilities);
+	std::pair<int, int> moveToMake{};
+	for (int i{}; i < moveProbabilities.size(); i++) {
+		if (r < cumProbabilities[i]) {
+			moveToMake = t.possibleMoves[i];
+			break;
+		}
+	}
+
+	auto moveIter = std::find(t.possibleMoves.begin(), t.possibleMoves.end(), moveToMake);
+	std::iter_swap(t.spots.begin() + (*moveIter).first,  t.spots.begin() + (*moveIter).second);
+	std::cout << "Moving from " << (*moveIter).first << " to " << (*moveIter).second << "\n";
+	t.lastMove = (*moveIter);
 }
 
 void TableClass::makeMove(TableClass::Table& t, const TableClass::MoveType& m, TableClass::Stats& s) {
-	int r{};
-	r = rand() % t.possibleMoves.size();
+	float r{};
+	//r = rand() % t.possibleMoves.size();
+	r = ((double)rand() / (RAND_MAX));
 	switch (m)
 	{
 	case TableClass::MoveType::Random:
@@ -204,7 +271,6 @@ void TableClass::makeMove(TableClass::Table& t, const TableClass::MoveType& m, T
 	case TableClass::MoveType::Fancy:
 	{
 		makeFancyMove(t, s, r);
-		std::cout << "Fancy move not available yet." << "\n";
 		break;
 	}
 	default:
@@ -219,7 +285,12 @@ void TableClass::updateScore(TableClass::Table& t, TableClass::Stats& s, const T
 	{
 		// Add ten points when card is movd to final stack
 		if (t.lastMove.second >= FIRST_FINAL_STACK_SPOT && t.lastMove.second < FIRST_FINAL_STACK_SPOT + FINAL_STACKS) {
+			std::cout << "Score up! Current score: " << s.score << std::endl;
 			s.score = s.score + 10;
+			s.moveValues.at(t.lastMove) += 1;
+		}
+		else {
+			s.moveValues.at(t.lastMove) -= 1;
 		}
 		break;
 	}
@@ -303,4 +374,8 @@ void TableClass::printResult(TableClass::Stats& s) {
 	}
 
 	std::cout << "The final score is: " << s.score << std::endl;
+
+	if (s.gameIsWon) {
+		auto wait = 1;
+	}
 }

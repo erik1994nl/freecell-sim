@@ -17,6 +17,7 @@ private:
 	static constexpr int FIRST_FREECELL_SPOT = 152;
 	static constexpr long long BLACK_CARDS = 1501199875790160; // Odd bits
 	static constexpr long long RED_CARDS = 3002399751580330; // Even bits
+	static constexpr int DEFAULT_MOVE_VALUE = 100000;
 
 public:
 	// Public member variables
@@ -71,6 +72,7 @@ private:
 	void getMovableCards(std::vector<int>& cards, TableClass::Table& t);
 	void getPossibleMoves(TableClass::Table& t, std::vector<int>& movableCards);
 	bool cardsAreCompatible(const unsigned long long& lowerCard, const unsigned long long& upperCard);
+	void makeFancyMove(TableClass::Table& t, TableClass::Stats& s, double r);
 public:
 	// Public methods
 	void setupTable(TableClass::Table& t);
