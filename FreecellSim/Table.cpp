@@ -98,8 +98,30 @@ void TableClass::saveStrategy(TableClass::Stats& s) {
 	fclose(pStratFile);
 }
 
+void TableClass::getTableDistance(TableClass::Table& t, TableClass::CompactTable& ct) {
+	std::array<int, 8> cardsInColumn{};
+	for (int col{}; col < TABLE_ROW; col++) {
+		// Get number of cards in column
+		cardsInColumn[col] = ((t.bottomCards[col] - col) / TABLE_ROW) + 1;
+
+		for (int row{}; row < cardsInColumn[col]; row++) {
+			// Table distance is sum of distance of every card
+			// card distance is steps to endpile * card penalty
+
+			unsigned long long card = ct.compactSpots[col] & ct.compactSpots[row + TABLE_ROW];
+			int penalty{};
+
+
+			auto suit = getSuit(card);
+			
+			//while(card > t.spots[FIRST_FINAL_STACK_SPOT + //color])
+		}
+
+	}
+	auto wait = 5;
+}
+
 void TableClass::updatePossibleMoves(TableClass::Table& t) {
-	Timer timer(__FUNCTION__);
 	std::vector<int> movableCards{};
 	getMovableCards(movableCards, t);
 
@@ -315,14 +337,33 @@ void TableClass::checkIfWon(TableClass::Table& t, TableClass::Stats& s) {
 }
 
 void TableClass::regularToCompact(TableClass::Table& t, TableClass::CompactTable& ct) {
-	// 13x12 rectangle of unsigned long longs
+	// 19x8 rectangle of unsigned long longs
 
 	// Reset compactSpots to zero
 	std::fill(ct.compactSpots.begin(), ct.compactSpots.end(), 0);
 
+	for (int col{}; col < TABLE_ROW; col++) {
+		for (int row{}; row < NUM_ROWS; row++) {
+			ct.compactSpots[col] = ct.compactSpots[col] | t.spots[col + row * TABLE_ROW];
+		}
+	}
+
+	for (int row{}; row < NUM_ROWS; row++) {
+		for (int col{}; col < TABLE_ROW; col++) {
+			ct.compactSpots[row + TABLE_ROW] = ct.compactSpots[row + TABLE_ROW] | t.spots[col + row * TABLE_ROW];
+		}
+	}
+}
+
+void TableClass::regularToSuperCompact(TableClass::Table& t, TableClass::SuperCompactTable& sct) {
+	// 13x12 rectangle of unsigned long longs
+
+	// Reset compactSpots to zero
+	std::fill(sct.superCompactSpots.begin(), sct.superCompactSpots.end(), 0);
+
 	// Initialize first row/col
-	ct.compactSpots[0] = t.spots[0];
-	ct.compactSpots[13] = t.spots[0];
+	sct.superCompactSpots[0] = t.spots[0];
+	sct.superCompactSpots[13] = t.spots[0];
 
 	int rowCounter{}, colCounter = 1;
 	for (int i = 1; i < t.spots.size(); i++) {
@@ -332,14 +373,29 @@ void TableClass::regularToCompact(TableClass::Table& t, TableClass::CompactTable
 			colCounter = 0;
 		}
 
-		ct.compactSpots[rowCounter] = ct.compactSpots[rowCounter] | t.spots[i];
-		ct.compactSpots[colCounter + 13] = ct.compactSpots[colCounter + 13] | t.spots[i];
+		sct.superCompactSpots[rowCounter] = sct.superCompactSpots[rowCounter] | t.spots[i];
+		sct.superCompactSpots[colCounter + 13] = sct.superCompactSpots[colCounter + 13] | t.spots[i];
 		colCounter++;
 	}
 }
 
 void TableClass::compactToRegular(TableClass::Table& t, TableClass::CompactTable& ct) {
 	// TODO: implement function body
+}
+
+TableClass::CardSuit TableClass::getSuit(unsigned long long& card) {
+	if (card & SPADES) {
+		return CardSuit::Spades;
+	}
+	else if (card & HEARTS) {
+		return CardSuit::Hearts;
+	}
+	else if (card & CLUBS) {
+		return CardSuit::Clubs;
+	}
+	else {
+		return CardSuit::Diamonds;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -375,7 +431,47 @@ void TableClass::printResult(TableClass::Stats& s) {
 
 	std::cout << "The final score is: " << s.score << std::endl;
 
+	s.gameIsWon ? printWin() : printLoss();
+
 	if (s.gameIsWon) {
 		auto wait = 1;
 	}
+}
+
+void TableClass::printWin() {
+	std::cout << "\n";
+	std::cout << "----------------------------\n";
+	std::cout << "------------------------||--\n";
+	std::cout << "-----------------------||---\n";
+	std::cout << "----------------------||----\n";
+	std::cout << "---------------------||-----\n";
+	std::cout << "--------------------||------\n";
+	std::cout << "--||---------------||-------\n";
+	std::cout << "----||------------||--------\n";
+	std::cout << "------|||--------||---------\n";
+	std::cout << "--------|||-----||----------\n";
+	std::cout << "----------||---||-----------\n";
+	std::cout << "-----------||-||------------\n";
+	std::cout << "------------|||-------------\n";
+	std::cout << "----------------------------\n";
+	std::cout << "\n";
+}
+
+void TableClass::printLoss() {
+	std::cout << "\n";
+	std::cout << "-----------------------------\n";
+	std::cout << "--|||-------------------|||--\n";
+	std::cout << "----|||---------------|||----\n";
+	std::cout << "------|||-----------|||------\n";
+	std::cout << "--------|||-------|||--------\n";
+	std::cout << "----------|||---|||----------\n";
+	std::cout << "------------||||||-----------\n";
+	std::cout << "------------||||||-----------\n";
+	std::cout << "----------|||---|||----------\n";
+	std::cout << "--------|||-------|||--------\n";
+	std::cout << "------|||-----------|||------\n";
+	std::cout << "----|||---------------|||----\n";
+	std::cout << "--|||-------------------|||--\n";
+	std::cout << "-----------------------------\n";
+	std::cout << "\n";
 }

@@ -18,24 +18,26 @@ int main()
 
 		T.setupTable(t);
 		T.updatePossibleMoves(t);
-		//T.regularToCompact(t, ct);
+		T.regularToCompact(t, ct);
 		//T.printPossibleMoves(t);
 
 		// Game loop
 		while (!s.gameIsFinished && s.turns < 200) {
 			std::cout << "turn: " << s.turns << std::endl;
+			T.getTableDistance(t, ct);
 			T.makeMove(t, strategy, s);
 			T.updateScore(t, s, scoringSystem);
 			T.updatePossibleMoves(t);
 			//T.printPossibleMoves(t);
 			T.checkIfGameIsFinished(t, s);
 			s.turns++;
-			//std::cout << "-------------------------------------------------" << std::endl;
 		}
 		T.checkIfWon(t, s);
 		T.printResult(s);
 
 		T.saveStrategy(s);
+
+		std::cout << "------------------------------------------" << std::endl;
 	}
 
 
