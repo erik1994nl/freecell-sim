@@ -69,13 +69,13 @@ public:
 			moveValues = {};
 		}
 	};
-	enum CardSuit {
+	enum class CardSuit {
 		Spades = 0,
 		Hearts,
 		Clubs,
 		Diamonds
 	};
-	enum MoveType
+	enum class MoveType
 	{
 		// Pick a randomly selected move from all available moves
 		Random,
@@ -83,7 +83,7 @@ public:
 		// Pick a move where all possible moves have pre-calculated possibilities
 		Fancy
 	};
-	enum ScoringSystem
+	enum class ScoringSystem
 	{
 		finalStackIsTen
 	};
@@ -93,6 +93,8 @@ private:
 	void getPossibleMoves(TableClass::Table& t, std::vector<int>& movableCards);
 	bool cardsAreCompatible(const unsigned long long& lowerCard, const unsigned long long& upperCard);
 	void makeFancyMove(TableClass::Table& t, TableClass::Stats& s, double r);
+	unsigned long long getOneCardValueLower(unsigned long long& card);
+	unsigned long long getOneCardValueHigher(unsigned long long& card);
 	void printWin();
 	void printLoss();
 public:

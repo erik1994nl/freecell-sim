@@ -111,8 +111,8 @@ void TableClass::getTableDistance(TableClass::Table& t, TableClass::CompactTable
 			unsigned long long card = ct.compactSpots[col] & ct.compactSpots[row + TABLE_ROW];
 			int penalty{};
 
-
 			auto suit = getSuit(card);
+			
 			
 			//while(card > t.spots[FIRST_FINAL_STACK_SPOT + //color])
 		}
@@ -174,40 +174,50 @@ void TableClass::getMovableCards(std::vector<int>& cards, TableClass::Table& t) 
 	}
 }
 
+unsigned long long TableClass::getOneCardValueLower(unsigned long long& card) {
+	return card >> 4;
+}
+
+unsigned long long TableClass::getOneCardValueHigher(unsigned long long& card) {
+	return card << 4;
+}
+
 void TableClass::getPossibleMoves(TableClass::Table& t, std::vector<int>& movableCards) {
 	t.possibleMoves.clear();
 	for (int i{}; i < movableCards.size(); i++) {
 
-		t.spots[movableCards[i]]; // Card to consider
+		unsigned long long cardToConsider = t.spots[movableCards[i]];
 		for (int j{}; j < t.bottomCards.size(); j++) {
 			// Card to consider is same as Bottom card
-			if (t.spots[movableCards[i]] & t.spots[t.bottomCards[j]]) {
+			if (cardToConsider & t.spots[t.bottomCards[j]]) {
 				continue;
 			}
 
 			// Card to consider and bottom card are same color
 			// TODO: This check overlaps next check, but might save computation time. Verify this
-			if (!((t.spots[movableCards[i]] | t.spots[t.bottomCards[j]]) & BLACK_CARDS &&
-				(t.spots[movableCards[i]] | t.spots[t.bottomCards[j]]) & RED_CARDS)) {
+			if (!((cardToConsider | t.spots[t.bottomCards[j]]) & BLACK_CARDS &&
+				(cardToConsider | t.spots[t.bottomCards[j]]) & RED_CARDS)) {
 				continue;
 			}
 
 			// Card to consider is compatible with bottom card
-			if (cardsAreCompatible(t.spots[movableCards[i]], t.spots[t.bottomCards[j]])) {
+			if (cardsAreCompatible(cardToConsider, t.spots[t.bottomCards[j]])) {
 				t.possibleMoves.emplace_back(std::make_pair(movableCards[i], t.bottomCards[j] + TABLE_ROW));
 			}
 		}
 
 		// Card to consider can move to final stack
 		for (int j{}; j < FINAL_STACKS; j++) {
-			if (t.spots[movableCards[i]] <= 8) {
-				if (!t.spots[FIRST_FINAL_STACK_SPOT + j] && log2(t.spots[movableCards[i]]) == j) {
+			// Ace
+			if (cardToConsider <= 8) {
+				if (!t.spots[FIRST_FINAL_STACK_SPOT + j] && log2(cardToConsider) == j) {
 					t.possibleMoves.emplace_back(std::make_pair(movableCards[i], FIRST_FINAL_STACK_SPOT + j));
 					continue;
 				}
 			}
+			// Non-ace
 			else {
-				if ((t.spots[FIRST_FINAL_STACK_SPOT + j] << 4) == t.spots[movableCards[i]]) {
+				if (t.spots[FIRST_FINAL_STACK_SPOT + j] == getOneCardValueLower(cardToConsider)) {
 					t.possibleMoves.emplace_back(std::make_pair(movableCards[i], FIRST_FINAL_STACK_SPOT + j));
 					continue;
 				}
