@@ -32,11 +32,13 @@ public:
 		std::vector<std::pair<int, int>> possibleMoves;
 		std::pair<int, int> lastMove;
 		std::array<int, TABLE_ROW> bottomCards;
+		int tableDistance;
 		Table() {
 			spots = {};
 			possibleMoves = {};
 			lastMove = {};
 			bottomCards = {};
+			tableDistance = {};
 		}
 	};
 	struct CompactTable {
@@ -95,6 +97,7 @@ private:
 	void makeFancyMove(TableClass::Table& t, TableClass::Stats& s, double r);
 	unsigned long long getOneCardValueLower(unsigned long long& card);
 	unsigned long long getOneCardValueHigher(unsigned long long& card);
+	int getPenalty(unsigned long long& card, TableClass::Table& t);
 	void printWin();
 	void printLoss();
 public:

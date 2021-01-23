@@ -98,8 +98,31 @@ void TableClass::saveStrategy(TableClass::Stats& s) {
 	fclose(pStratFile);
 }
 
+int TableClass::getPenalty(unsigned long long& card, TableClass::Table& t) {
+	int penalty{};
+
+	auto suit = getSuit(card);
+
+	int penaltyRefCard = 0;
+	for (int i = FIRST_FINAL_STACK_SPOT; i < 4; i++) {
+		if (suit == getSuit(t.spots[i])) {
+			penaltyRefCard = t.spots[i];
+		}
+	}
+
+	unsigned long long penaltyChecker = card;
+	while (penaltyChecker > penaltyRefCard) {
+		penaltyChecker = penaltyChecker >> 4;
+		penalty++;
+	}
+
+	return penalty;
+}
+
 void TableClass::getTableDistance(TableClass::Table& t, TableClass::CompactTable& ct) {
 	std::array<int, 8> cardsInColumn{};
+	t.tableDistance = 0;
+
 	for (int col{}; col < TABLE_ROW; col++) {
 		// Get number of cards in column
 		cardsInColumn[col] = ((t.bottomCards[col] - col) / TABLE_ROW) + 1;
@@ -109,16 +132,13 @@ void TableClass::getTableDistance(TableClass::Table& t, TableClass::CompactTable
 			// card distance is steps to endpile * card penalty
 
 			unsigned long long card = ct.compactSpots[col] & ct.compactSpots[row + TABLE_ROW];
-			int penalty{};
+			
+			int penalty = getPenalty(card, t);
+			int cardDistance = cardsInColumn[col] - row;
 
-			auto suit = getSuit(card);
-			
-			
-			//while(card > t.spots[FIRST_FINAL_STACK_SPOT + //color])
+			t.tableDistance += penalty * cardDistance;
 		}
-
 	}
-	auto wait = 5;
 }
 
 void TableClass::updatePossibleMoves(TableClass::Table& t) {
