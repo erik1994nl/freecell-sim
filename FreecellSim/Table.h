@@ -7,21 +7,37 @@
 class TableClass {
 private:
 	// Private member variables
+	// Total nunber of spots on table
 	static constexpr int TOTAL_SPOTS = 156;
+	// Number of cards in stock
 	static constexpr int NUMBER_OF_CARDS = 52;
+	// Number of spot on table excluded final spots and freecells
 	static constexpr int REGULAR_SPOTS = 148;
+	// Cards per row
 	static constexpr int TABLE_ROW = 8;
+	// Number of playable rows
 	static constexpr int NUM_ROWS = 19;
+	// Number of spots on table for final stacks
 	static constexpr int FINAL_STACKS = 4;
+	// Spot number of the first final stack
 	static constexpr int FIRST_FINAL_STACK_SPOT = 148;
+	// Number of spots on table for freecells
 	static constexpr int FREECELLS = 4;
+	// Spot number of the first freecell
 	static constexpr int FIRST_FREECELL_SPOT = 152;
+	// Unsigned long long with all black bits equal to one
 	static constexpr long long BLACK_CARDS = 1501199875790160; // Odd bits
+	// Unsigned long long with all red bits equal to one
 	static constexpr long long RED_CARDS = 3002399751580330; // Even bits
+	// Unsigned long long with all spade bits equal to one
 	static constexpr long long SPADES = 300239975158033;
+	// Unsigned long long with all hearts bits equal to one
 	static constexpr long long HEARTS = 600479950316066;
+	// Unsigned long long with all clubs bits equal to one
 	static constexpr long long CLUBS = 1200959900632130;
+	// Unsigned long long with all diamonds bits equal to one
 	static constexpr long long DIAMONDS = 2401919801264260;
+	// Default non-normalized value for a move
 	static constexpr int DEFAULT_MOVE_VALUE = 100000;
 
 
@@ -91,10 +107,15 @@ public:
 	};
 private:
 	// Private methods
+	int getNumberOfCardsInColumn(TableClass::Table& t, int& col);
+	unsigned long long getCardCompact(TableClass::CompactTable& ct, int& col, int& row);
 	void getMovableCards(std::vector<int>& cards, TableClass::Table& t);
 	void getPossibleMoves(TableClass::Table& t, std::vector<int>& movableCards);
 	bool cardsAreCompatible(const unsigned long long& lowerCard, const unsigned long long& upperCard);
 	void makeFancyMove(TableClass::Table& t, TableClass::Stats& s, double r);
+	unsigned long long getCardOneSpotLower(TableClass::Table& t, int& spot);
+	unsigned long long getCardOneSpotLower(TableClass::Table& t, unsigned long long& card);
+	unsigned long long getCardOneSpotLower(TableClass::Table& t, int& col, int& row);
 	unsigned long long getOneCardValueLower(unsigned long long& card);
 	unsigned long long getOneCardValueHigher(unsigned long long& card);
 	int getPenalty(unsigned long long& card, TableClass::Table& t);

@@ -98,13 +98,22 @@ void TableClass::saveStrategy(TableClass::Stats& s) {
 	fclose(pStratFile);
 }
 
+int TableClass::getNumberOfCardsInColumn(TableClass::Table& t, int& col) {
+	return ((t.bottomCards[col] - col) / TABLE_ROW);
+}
+
+unsigned long long TableClass::getCardCompact(TableClass::CompactTable& ct, int& col, int& row) {
+	return ct.compactSpots[col] & ct.compactSpots[row + TABLE_ROW];
+}
+
+
 int TableClass::getPenalty(unsigned long long& card, TableClass::Table& t) {
-	int penalty{};
-
 	auto suit = getSuit(card);
-
+	int penalty{};
 	int penaltyRefCard = 0;
-	for (int i = FIRST_FINAL_STACK_SPOT; i < 4; i++) {
+
+
+	for (int i = FIRST_FINAL_STACK_SPOT; i < FIRST_FINAL_STACK_SPOT + 4; i++) {
 		if (suit == getSuit(t.spots[i])) {
 			penaltyRefCard = t.spots[i];
 		}
@@ -123,15 +132,16 @@ void TableClass::getTableDistance(TableClass::Table& t, TableClass::CompactTable
 	std::array<int, 8> cardsInColumn{};
 	t.tableDistance = 0;
 
+	// Calculate penalty & distance for every card to get table distance
 	for (int col{}; col < TABLE_ROW; col++) {
 		// Get number of cards in column
-		cardsInColumn[col] = ((t.bottomCards[col] - col) / TABLE_ROW) + 1;
+		cardsInColumn[col] = getNumberOfCardsInColumn(t, col);
 
 		for (int row{}; row < cardsInColumn[col]; row++) {
 			// Table distance is sum of distance of every card
 			// card distance is steps to endpile * card penalty
 
-			unsigned long long card = ct.compactSpots[col] & ct.compactSpots[row + TABLE_ROW];
+			unsigned long long card = getCardCompact(ct, col, row);
 			
 			int penalty = getPenalty(card, t);
 			int cardDistance = cardsInColumn[col] - row;
@@ -148,16 +158,32 @@ void TableClass::updatePossibleMoves(TableClass::Table& t) {
 	getPossibleMoves(t, movableCards);
 }
 
+unsigned long long TableClass::getCardOneSpotLower(TableClass::Table& t, int& spot) {
+	return t.spots[spot + TABLE_ROW];
+}
+
+unsigned long long TableClass::getCardOneSpotLower(TableClass::Table& t, unsigned long long& card) {
+	
+}
+
+unsigned long long TableClass::getCardOneSpotLower(TableClass::Table& t, int& col, int& row) {
+
+}
+
+
+
 void TableClass::getMovableCards(std::vector<int>& cards, TableClass::Table& t) {
 	bool skipRestOfColumn[TABLE_ROW] = { 0 };
+	unsigned long long card{};
 	for (int i = REGULAR_SPOTS - 1; i >= 0; i--) {
+		card = t.spots[i];
 		// Spot does not contain card
-		if (!t.spots[i]) {
+		if (!card) {
 			continue;
 		}
 
 		// Spot is not bottom card AND has incompatible lower card
-		if (t.spots[i + TABLE_ROW] && !cardsAreCompatible(t.spots[i + TABLE_ROW], t.spots[i])) {
+		if (t.spots[i + TABLE_ROW] && !cardsAreCompatible(getCardOneSpotLower(t, i), card)) {
 			skipRestOfColumn[i % TABLE_ROW] = true;
 			continue;
 		}
@@ -178,7 +204,7 @@ void TableClass::getMovableCards(std::vector<int>& cards, TableClass::Table& t) 
 		}
 
 		// Spot is bottom card
-		if (!t.spots[i + TABLE_ROW]) {
+		if (!getCardOneSpotLower(t, i)) {
 			t.bottomCards[i % TABLE_ROW] = i;
 		}
 
@@ -188,7 +214,8 @@ void TableClass::getMovableCards(std::vector<int>& cards, TableClass::Table& t) 
 
 	// Add freecell cards
 	for (int i = FIRST_FREECELL_SPOT; i < FIRST_FREECELL_SPOT + FREECELLS; i++) {
-		if (t.spots[i]) {
+		card = t.spots[i];
+		if (card) {
 			cards.push_back(i);
 		}
 	}
@@ -282,7 +309,6 @@ void::TableClass::makeFancyMove(TableClass::Table& t, TableClass::Stats& s, doub
 		}
 		totalValue += s.moveValues[move];
 	}
-
 
 	std::vector<double> moveProbabilities{};
 
