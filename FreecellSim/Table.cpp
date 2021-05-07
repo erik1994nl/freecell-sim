@@ -162,13 +162,13 @@ unsigned long long TableClass::getCardOneSpotLower(TableClass::Table& t, int& sp
 	return t.spots[spot + TABLE_ROW];
 }
 
-unsigned long long TableClass::getCardOneSpotLower(TableClass::Table& t, unsigned long long& card) {
-	
-}
-
-unsigned long long TableClass::getCardOneSpotLower(TableClass::Table& t, int& col, int& row) {
-
-}
+//unsigned long long TableClass::getCardOneSpotLower(TableClass::Table& t, unsigned long long& card) {
+//	
+//}
+//
+//unsigned long long TableClass::getCardOneSpotLower(TableClass::Table& t, int& col, int& row) {
+//
+//}
 
 
 
